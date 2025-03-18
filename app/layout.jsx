@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
       <body
         className="antialiased flex justify-center"
       >
-        <div className="max-w-[1200px] h-auto w-full">
+        <div className="max-w-[1920px] h-auto w-full">
           {children}
         </div>
       </body>
