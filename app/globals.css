@@ -34,11 +34,12 @@
   --color-foreground: var(--foreground); */
     --color-white-border: #E5E7EB;
     --color-pink-shade: #FFF1F4;
+    --color-pink-accent: #FF4D8D;
     --color-text-normal-black: #1F2937;
     --color-text-secondary-black: #4B5563;
     --font-inter-bold: "inter_bold";
     --font-inter-regular: "inter_regular";
-    --font-inter-medium: "inter_meduim";
+    --font-inter-medium: "inter_medium";
     /* --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono); */
 }
