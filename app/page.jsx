@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronsLeft, ChevronsRight, Instagram, MessageCircle, ShoppingCart, UserPen } from 'lucide-react'
+import { ChevronsLeft, ChevronsRight, Instagram, MessageCircle, Search, ShoppingCart, UserPen } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
 const Page = () => {
@@ -54,7 +54,10 @@ const Page = () => {
       <div className='w-full px-[125px] border-0 border-b-[2px] border-white-border'>
         <div className='w-full h-[75px] flex items-center justify-between'>
           <h3 className='w-[25%] text-start font-inter-bold text-[24px] leading-[32px] text-text-normal-black'>Kalakari chronicles</h3>
-          <input type="text" name="" id="" placeholder='Search for handicrafted items...' className='w-[50%] border-[1px] border-white-border h-[32px] px-[15px] font-inter-regular text-[16px] leading-[24px] rounded-[8px] outline-0' />
+          <div className='w-[50%] flex gap-[15px] items-center justify-between border-[1px] border-white-border h-[32px] px-[15px] rounded-[8px]'>
+            <input type="text" name="" id="" placeholder='Search for handicrafted items...' className='w-[calc(100%-39px)] font-inter-regular text-[16px] leading-[24px] outline-0' />
+            <Search size={24} className='text-text-normal-black cursor-pointer' />
+          </div>
           <div className='flex flex-row items-center gap-[25px] w-[25%] justify-end'>
             <ShoppingCart size={24} color='#1F2937' className='cursor-pointer' />
             <UserPen size={24} color='#1F2937' className='cursor-pointer' />
@@ -189,32 +192,32 @@ const Page = () => {
 
       <div className='w-full flex items-start justify-between px-[125px] mt-[50px]'>
         <div className='w-[calc(100%/3)] flex flex-col gap-[5px]'>
-          <h3 className='font-inter-bold text-[18px] leading-[28px] text-pink-accent'>About us</h3>
-          <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Kalakari Chronicles celebrates handmade artistry and craftsmanship, bringing unique pieces to art lovers worldwide.</p>
+          <h3 className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>About us</h3>
+          <p className='font-inter-regular text-[14px] leading-[22px] text-text-secondary-black'>Kalakari Chronicles celebrates handmade artistry and craftsmanship, bringing unique pieces to art lovers worldwide.</p>
         </div>
         <div className='w-[calc(100%/3)] flex items-center justify-center'>
           <div className='w-max flex flex-col gap-[5px]'>
-            <div className='flex gap-[10px]'><h3 className='font-inter-bold text-[18px] leading-[28px] text-pink-accent'>Location:</h3> <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Mumbai</p></div>
-            <div className='flex gap-[10px]'><h3 className='font-inter-bold text-[18px] leading-[28px] text-pink-accent'>Managed by:</h3> <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Sharvari Uttam Palande</p></div>
-            <div className='flex gap-[10px]'><h3 className='font-inter-bold text-[18px] leading-[28px] text-pink-accent'>Manufacturing process:</h3> <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Handmade</p></div>
+            <div className='flex gap-[10px]'><h3 className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Location:</h3> <p className='font-inter-regular text-[14px] leading-[22px] text-text-secondary-black'>Mumbai</p></div>
+            <div className='flex gap-[10px]'><h3 className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Managed by:</h3> <p className='font-inter-regular text-[14px] leading-[22px] text-text-secondary-black'>Sharvari Uttam Palande</p></div>
+            <div className='flex gap-[10px]'><h3 className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Manufacturing process:</h3> <p className='font-inter-regular text-[14px] leading-[22px] text-text-secondary-black'>Handmade</p></div>
           </div>
         </div>
         <div className='w-[calc(100%/3)] flex justify-end'>
           <div className='w-max flex flex-col gap-[5px]'>
-            <h3 className='font-inter-bold text-[18px] leading-[28px] text-pink-accent'>Connect us on</h3>
+            <h3 className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Connect us on</h3>
             <div className='flex gap-[20px]'>
-              <div className='bg-pink-shade p-[20px] rounded-full drop-shadow-md'>
-                <MessageCircle size={24} className='text-text-secondary-black' />
+              <div className='bg-pink-shade p-[15px] rounded-full drop-shadow-md'>
+                <MessageCircle size={16} className='text-text-secondary-black aspect-square' />
               </div>
-              <div className='bg-pink-shade p-[20px] rounded-full drop-shadow-md'>
-                <Instagram size={24} className='text-text-secondary-black' />
+              <div className='bg-pink-shade p-[15px] rounded-full drop-shadow-md'>
+                <Instagram size={16} className='text-text-secondary-black aspect-square' />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <p className=' mt-[20px] font-inter-regular text-[15px] w-full text-center'>@2025 Kalakari chronicles. All rights reserved.</p>
+      <p className=' mt-[20px] font-inter-regular text-[12px] w-full text-center'>@2025 Kalakari chronicles. All rights reserved.</p>
     </>
   )
 }
