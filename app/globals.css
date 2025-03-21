@@ -62,3 +62,9 @@ body {
     height: 0;
     width: 0;
 }
+
+.dashboard-table {
+    background: white;
+}
+
+.dashboard-table:nth-child(2n) {}
