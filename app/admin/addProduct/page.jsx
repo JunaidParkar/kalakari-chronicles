@@ -1,6 +1,7 @@
 "use client"
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import dynamic from 'next/dynamic';
+import axios from 'axios';
 const JoditEditor = dynamic(() => import('jodit-react'), { ssr: false });
 
 const Page = () => {
@@ -22,14 +23,14 @@ const Page = () => {
     const handleImageChange = (event, index) => {
         const file = event.target.files[0];
         if (file) {
-            const imageUrl = URL.createObjectURL(file); // Create a temporary URL
             const updatedImages = [...images];
-            updatedImages[index] = imageUrl;
+            updatedImages[index] = file; // Store the actual File object
             setImages(updatedImages);
         }
     };
+    
 
-    const submitData = (e) => {
+    const submitData = async (e) => {
         e.preventDefault()
         if (productData.name.trim() == "" || productData.price <= 0 || productData.madeBy.trim() == "" || description.trim() == "") {
             alert(`Please Enter the ${productData.name.trim() == "" ? "product name" : productData.price <= 0 ? "Price of the product" : productData.madeBy.trim() == "" ? "name of the creator" : description.trim() == "" ? "description of product" : ""}`)
@@ -50,6 +51,22 @@ const Page = () => {
                 formData.append(`image${index + 1}`, image);
             }
         });
+
+        try {
+            const { data } = await axios.post(
+              "http://localhost:5000/admin/addProduct",
+              formData,
+              {
+                headers: { "Content-Type": "multipart/form-data" },
+              }
+            );
+      
+            console.log("Upload Success:", data);
+            alert("Product uploaded successfully!");
+          } catch (error) {
+            console.error("Upload Error:", error.response?.data || error.message);
+            alert("Upload failed!");
+          }
     }
 
 
@@ -79,10 +96,10 @@ const Page = () => {
                         />
                     </div>
                     <div className='w-full mt-[20px] flex gap-[20px]'>
-                        <label htmlFor="image1" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[0] != null ? { display: "none" } : { display: "block" }}>Select Image 1</p><img src={images[0]} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[0] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
-                        <label htmlFor="image2" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[1] != null ? { display: "none" } : { display: "block" }}>Select Image 2</p><img src={images[1]} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[1] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
-                        <label htmlFor="image3" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[2] != null ? { display: "none" } : { display: "block" }}>Select Image 3</p><img src={images[2]} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[2] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
-                        <label htmlFor="image4" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[3] != null ? { display: "none" } : { display: "block" }}>Select Image 4</p><img src={images[3]} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[3] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
+                        <label htmlFor="image1" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[0] != null ? { display: "none" } : { display: "block" }}>Select Image 1</p><img src={images[0] ? URL.createObjectURL(images[0]) : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[0] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
+                        <label htmlFor="image2" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[1] != null ? { display: "none" } : { display: "block" }}>Select Image 2</p><img src={images[1] ? URL.createObjectURL(images[1]) : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[1] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
+                        <label htmlFor="image3" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[2] != null ? { display: "none" } : { display: "block" }}>Select Image 3</p><img src={images[2] ? URL.createObjectURL(images[2]) : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[2] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
+                        <label htmlFor="image4" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[3] != null ? { display: "none" } : { display: "block" }}>Select Image 4</p><img src={images[3] ? URL.createObjectURL(images[3]) : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[3] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
                         <input type="file" id='image1' accept="image/*" className='hidden' onChange={(e) => handleImageChange(e, 0)} />
                         <input type="file" id='image2' accept="image/*" className='hidden' onChange={(e) => handleImageChange(e, 1)} />
                         <input type="file" id='image3' accept="image/*" className='hidden' onChange={(e) => handleImageChange(e, 2)} />
