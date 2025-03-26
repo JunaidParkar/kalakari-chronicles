@@ -10,7 +10,8 @@ const Page = () => {
     const [productData, setProductData] = useState({
         name: "",
         price: 0,
-        madeBy: ""
+        madeBy: "",
+        category: ""
     })
     const [images, setImages] = useState([null, null, null, null])
     const config = useMemo(() => ({
@@ -44,6 +45,7 @@ const Page = () => {
         formData.append("name", productData.name);
         formData.append("price", productData.price);
         formData.append("madeBy", productData.madeBy);
+        formData.append("category", productData.category);
         formData.append("description", description);
 
         images.forEach((image, index) => {
@@ -81,7 +83,8 @@ const Page = () => {
                 <h3 className='font-inter-bold text-[24px] leading-[30px] text-text-normal-black'>Add a new product</h3>
                 <form className='w-full mt-[30px]' onSubmit={submitData}>
                     <div className='w-full flex gap-[20px] flex-wrap'>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-full'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={productData.name} onChange={val => setProductData({...productData, name: val.target.value})} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={productData.name} onChange={val => setProductData({...productData, name: val.target.value})} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={productData.name} onChange={val => setProductData({...productData, category: val.target.value})} /></div>
                         <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="number" name="" id="" placeholder='Enter the price of the product' value={productData.price} onChange={val => setProductData({...productData, price: val.target.value})} /></div>
                         <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Product Made By' value={productData.madeBy} onChange={val => setProductData({...productData, madeBy: val.target.value})} /></div>
                     </div>
