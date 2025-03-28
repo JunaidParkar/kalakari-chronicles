@@ -1,48 +1,112 @@
-"use client"
-import React, { useRef, useState, useMemo, useEffect } from 'react'
-import dynamic from 'next/dynamic';
-import axios from 'axios';
-const JoditEditor = dynamic(() => import('jodit-react'), { ssr: false });
+"use client";
+import React, { useRef, useState, useMemo, useEffect, use } from "react";
+import dynamic from "next/dynamic";
+import axios from "axios";
 
-const Page = () => {
-    const [uploading, setUploading] = useState(false)
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+
+const Page = ({ params }) => {
+    const {id} = use(params);
+    const [loading, setLoading] = useState(false)
+    const dummyResonse = {
+        "product": {
+          "name": "hjbk",
+          "price": "05",
+          "description": "<p>efefefefefe</p>",
+          "madeBy": "kku",
+          "images": [
+            "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/f1fjdtqv8vgx54umbpog.jpg",
+            "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/wl4iyna0d631ugwhvbgp.png",
+            "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/bcqymmti7jefpz7mjdcf.jpg",
+            "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/k1hqfnvdmeef4420bmwf.jpg"
+          ],
+          "image_public_ids": [
+            "products/f1fjdtqv8vgx54umbpog",
+            "products/wl4iyna0d631ugwhvbgp",
+            "products/bcqymmti7jefpz7mjdcf",
+            "products/k1hqfnvdmeef4420bmwf"
+          ],
+          "createdAt": "2025-03-26T19:28:27.444Z"
+        }
+      }
+
+    const [realProductData, setRealProductData] = useState({
+        name: "",
+        price: 0,
+        madeBy: "",
+        category: "",
+        description: ""
+    })
+
+    const [uploading, setUploading] = useState(false);
     const editor = useRef(null);
-    const [description, setDescription] = useState('');
+    const [description, setDescription] = useState("");
     const [productData, setProductData] = useState({
         name: "",
         price: 0,
         madeBy: "",
-        category: ""
-    })
-    const [images, setImages] = useState([null, null, null, null])
-    const config = useMemo(() => ({
-        readonly: false, // all options from https://xdsoft.net/jodit/docs/,
-        placeholder: "Enter the descripton for the product..."
-    }),
+        category: "",
+    });
+    const [images, setImages] = useState([null, null, null, null]);
+
+    const config = useMemo(
+        () => ({
+            readonly: false,
+            placeholder: "Enter the description for the product...",
+        }),
         []
     );
+
+    useEffect(() => {
+        if (id) {
+            setLoading(true)
+            let data = dummyResonse
+            setRealProductData({name: data.product.name, category: data.product})
+            setLoading(false)
+            // axios.post()
+        }
+    }, [id]);
 
     const handleImageChange = (event, index) => {
         const file = event.target.files[0];
         if (file) {
             const updatedImages = [...images];
-            updatedImages[index] = file; // Store the actual File object
+            updatedImages[index] = file;
             setImages(updatedImages);
         }
     };
-    
 
     const submitData = async (e) => {
-        e.preventDefault()
-        setUploading(true)
-        if (productData.name.trim() == "" || productData.price <= 0 || productData.madeBy.trim() == "" || description.trim() == "") {
-            alert(`Please Enter the ${productData.name.trim() == "" ? "product name" : productData.price <= 0 ? "Price of the product" : productData.madeBy.trim() == "" ? "name of the creator" : description.trim() == "" ? "description of product" : ""}`)
-            return
+        e.preventDefault();
+        setUploading(true);
+
+        if (
+            productData.name.trim() === "" ||
+            productData.price <= 0 ||
+            productData.madeBy.trim() === "" ||
+            description.trim() === ""
+        ) {
+            alert(
+                `Please Enter the ${
+                    productData.name.trim() === ""
+                        ? "product name"
+                        : productData.price <= 0
+                        ? "Price of the product"
+                        : productData.madeBy.trim() === ""
+                        ? "name of the creator"
+                        : "description of product"
+                }`
+            );
+            setUploading(false);
+            return;
         }
-        if (images[0] == null || images[1] == null || images[2] == null || images[3] == null) {
-            alert("Please select all 4 images")
-            return
+
+        if (images.some((img) => img === null)) {
+            alert("Please select all 4 images");
+            setUploading(false);
+            return;
         }
+
         const formData = new FormData();
         formData.append("name", productData.name);
         formData.append("price", productData.price);
@@ -58,25 +122,25 @@ const Page = () => {
 
         try {
             const { data } = await axios.post(
-              "http://localhost:5000/admin/addProduct",
-              formData,
-              {
-                headers: { "Content-Type": "multipart/form-data" },
-              }
+                "http://localhost:5000/admin/addProduct",
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
             );
-      
+
             console.log("Upload Success:", data);
             alert("Product uploaded successfully!");
-          } catch (error) {
+        } catch (error) {
             console.error("Upload Error:", error.response?.data || error.message);
             alert("Upload failed!");
-          }
-          setUploading(false)
-    }
-
+        }
+        setUploading(false);
+    };
 
     return (
         <>
+            <div className="fixed z-[599] top-0 left-0 w-full h-[100dvh] backdrop-blur-sm flex justify-center items-center" style={loading ? {display: "flex"} : {display: "none"}}><p className="text-[16px] leading-[24px] text-text-normal-black font-inter-regular">Loading product data...</p></div>
             <div className='w-full h-[75px] px-[25px] flex justify-between items-center bg-white border-0 border-b border-white-border'>
                 <h3 className='font-inter-bold text-[24px] leading-[32px] text-pink-accent'>Admin Panel</h3>
                 <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Sharvari Uttam Palande</p>
@@ -87,13 +151,9 @@ const Page = () => {
                 <form className='w-full mt-[30px]' onSubmit={submitData}>
                     <div className='w-full flex gap-[20px] flex-wrap'>
                         <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={productData.name} onChange={val => setProductData({...productData, name: val.target.value})} /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={productData.category} onChange={val => setProductData({...productData, category: val.target.value})} list='categoryList' /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={productData.name} onChange={val => setProductData({...productData, category: val.target.value})} /></div>
                         <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="number" name="" id="" placeholder='Enter the price of the product' value={productData.price} onChange={val => setProductData({...productData, price: val.target.value})} /></div>
                         <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Product Made By' value={productData.madeBy} onChange={val => setProductData({...productData, madeBy: val.target.value})} /></div>
-                        <datalist id='categoryList'>
-                            <option value="Painting"></option>
-                            <option value="Canvas"></option>
-                        </datalist>
                     </div>
                     <div className='w-full mt-[20px]'>
                         <JoditEditor
@@ -124,7 +184,7 @@ const Page = () => {
                 <p className='absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] font-inter-medium text-[20px] leading-[26px]'>Uploading...</p>
             </div>
         </>
-    )
-}
+    );
+};
 
-export default Page
+export default Page;
