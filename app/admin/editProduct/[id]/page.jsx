@@ -8,12 +8,14 @@ const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 const Page = ({ params }) => {
     const {id} = use(params);
     const [loading, setLoading] = useState(false)
+    const [uploading, setUploading] = useState(false)
     const dummyResonse = {
         "product": {
           "name": "hjbk",
           "price": "05",
           "description": "<p>efefefefefe</p>",
           "madeBy": "kku",
+          "category": "iuhui",
           "images": [
             "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/f1fjdtqv8vgx54umbpog.jpg",
             "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/wl4iyna0d631ugwhvbgp.png",
@@ -38,7 +40,6 @@ const Page = ({ params }) => {
         description: ""
     })
 
-    const [uploading, setUploading] = useState(false);
     const editor = useRef(null);
     const [description, setDescription] = useState("");
     const [productData, setProductData] = useState({
@@ -48,6 +49,28 @@ const Page = ({ params }) => {
         category: "",
     });
     const [images, setImages] = useState([null, null, null, null]);
+
+    const [categories, setCategories] = useState([])
+
+    useEffect(() => {
+        const getCategories = async () => {
+            setLoading(true)
+            try {
+                const response = await axios.post("http://localhost:5000/admin/getCategories");
+                if (response.data && response.data.categories) {
+                    setCategories(Object.values(response.data.categories)); // Ensure categories is an array
+                }
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+            if (id) {
+                let data = dummyResonse
+                setRealProductData({name: data.product.name, category: data.product.category, description: data.product.description, price: data.product.price, madeBy: data.product.madeBy})
+            }
+            setLoading(false)
+        };
+        getCategories();
+    }, []);
 
     const config = useMemo(
         () => ({
@@ -60,8 +83,7 @@ const Page = ({ params }) => {
     useEffect(() => {
         if (id) {
             setLoading(true)
-            let data = dummyResonse
-            setRealProductData({name: data.product.name, category: data.product})
+            
             setLoading(false)
             // axios.post()
         }
@@ -140,7 +162,6 @@ const Page = ({ params }) => {
 
     return (
         <>
-            <div className="fixed z-[599] top-0 left-0 w-full h-[100dvh] backdrop-blur-sm flex justify-center items-center" style={loading ? {display: "flex"} : {display: "none"}}><p className="text-[16px] leading-[24px] text-text-normal-black font-inter-regular">Loading product data...</p></div>
             <div className='w-full h-[75px] px-[25px] flex justify-between items-center bg-white border-0 border-b border-white-border'>
                 <h3 className='font-inter-bold text-[24px] leading-[32px] text-pink-accent'>Admin Panel</h3>
                 <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Sharvari Uttam Palande</p>
@@ -150,10 +171,15 @@ const Page = ({ params }) => {
                 <h3 className='font-inter-bold text-[24px] leading-[30px] text-text-normal-black'>Add a new product</h3>
                 <form className='w-full mt-[30px]' onSubmit={submitData}>
                     <div className='w-full flex gap-[20px] flex-wrap'>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={productData.name} onChange={val => setProductData({...productData, name: val.target.value})} /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={productData.name} onChange={val => setProductData({...productData, category: val.target.value})} /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="number" name="" id="" placeholder='Enter the price of the product' value={productData.price} onChange={val => setProductData({...productData, price: val.target.value})} /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Product Made By' value={productData.madeBy} onChange={val => setProductData({...productData, madeBy: val.target.value})} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={productData.name} onChange={val => setProductData({ ...productData, name: val.target.value })} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={productData.category} onChange={val => setProductData({ ...productData, category: val.target.value })} list='categoryList' /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="number" name="" id="" placeholder='Enter the price of the product' value={productData.price} onChange={val => setProductData({ ...productData, price: val.target.value })} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Product Made By' value={productData.madeBy} onChange={val => setProductData({ ...productData, madeBy: val.target.value })} /></div>
+                        <datalist id='categoryList'>
+                            {categories.map((cat, index) => (
+                                <option key={index} value={cat}></option>
+                            ))}
+                        </datalist>
                     </div>
                     <div className='w-full mt-[20px]'>
                         <JoditEditor
@@ -180,11 +206,14 @@ const Page = ({ params }) => {
                     </div>
                 </form>
             </div>
-            <div className='fixed z-[500] top-0 left-0 w-full h-[100dvh] backdrop-blur-sm bg-transparent' style={uploading ? {display: "block"} : {display: "none"}}>
+            <div className='fixed z-[500] top-0 left-0 w-full h-[100dvh] backdrop-blur-sm bg-transparent' style={uploading ? { display: "block" } : { display: "none" }}>
                 <p className='absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] font-inter-medium text-[20px] leading-[26px]'>Uploading...</p>
             </div>
+            <div className='fixed z-[500] top-0 left-0 w-full h-[100dvh] backdrop-blur-sm bg-transparent' style={loading ? { display: "block" } : { display: "none" }}>
+                <p className='absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] font-inter-medium text-[20px] leading-[26px]'>Loading...</p>
+            </div>
         </>
-    );
+    )
 };
 
 export default Page;

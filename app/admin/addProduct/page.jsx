@@ -5,6 +5,7 @@ import axios from 'axios';
 const JoditEditor = dynamic(() => import('jodit-react'), { ssr: false });
 
 const Page = () => {
+    const [loading, setLoading] = useState(false)
     const [uploading, setUploading] = useState(false)
     const editor = useRef(null);
     const [description, setDescription] = useState('');
@@ -21,6 +22,25 @@ const Page = () => {
     }),
         []
     );
+    const [categories, setCategories] = useState([])
+
+    useEffect(() => {
+        const getCategories = async () => {
+            setLoading(true)
+            try {
+                const response = await axios.post("http://localhost:5000/admin/getCategories");
+                if (response.data && response.data.categories) {
+                    setCategories(Object.values(response.data.categories)); // Ensure categories is an array
+                }
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+            setLoading(false)
+        };
+        getCategories();
+    }, []);
+
+
 
     const handleImageChange = (event, index) => {
         const file = event.target.files[0];
@@ -30,7 +50,7 @@ const Page = () => {
             setImages(updatedImages);
         }
     };
-    
+
 
     const submitData = async (e) => {
         e.preventDefault()
@@ -58,20 +78,20 @@ const Page = () => {
 
         try {
             const { data } = await axios.post(
-              "http://localhost:5000/admin/addProduct",
-              formData,
-              {
-                headers: { "Content-Type": "multipart/form-data" },
-              }
+                "http://localhost:5000/admin/addProduct",
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
             );
-      
+
             console.log("Upload Success:", data);
             alert("Product uploaded successfully!");
-          } catch (error) {
+        } catch (error) {
             console.error("Upload Error:", error.response?.data || error.message);
             alert("Upload failed!");
-          }
-          setUploading(false)
+        }
+        setUploading(false)
     }
 
 
@@ -86,13 +106,14 @@ const Page = () => {
                 <h3 className='font-inter-bold text-[24px] leading-[30px] text-text-normal-black'>Add a new product</h3>
                 <form className='w-full mt-[30px]' onSubmit={submitData}>
                     <div className='w-full flex gap-[20px] flex-wrap'>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={productData.name} onChange={val => setProductData({...productData, name: val.target.value})} /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={productData.category} onChange={val => setProductData({...productData, category: val.target.value})} list='categoryList' /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="number" name="" id="" placeholder='Enter the price of the product' value={productData.price} onChange={val => setProductData({...productData, price: val.target.value})} /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Product Made By' value={productData.madeBy} onChange={val => setProductData({...productData, madeBy: val.target.value})} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={productData.name} onChange={val => setProductData({ ...productData, name: val.target.value })} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={productData.category} onChange={val => setProductData({ ...productData, category: val.target.value })} list='categoryList' /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="number" name="" id="" placeholder='Enter the price of the product' value={productData.price} onChange={val => setProductData({ ...productData, price: val.target.value })} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Product Made By' value={productData.madeBy} onChange={val => setProductData({ ...productData, madeBy: val.target.value })} /></div>
                         <datalist id='categoryList'>
-                            <option value="Painting"></option>
-                            <option value="Canvas"></option>
+                            {categories.map((cat, index) => (
+                                <option key={index} value={cat}></option>
+                            ))}
                         </datalist>
                     </div>
                     <div className='w-full mt-[20px]'>
@@ -120,8 +141,11 @@ const Page = () => {
                     </div>
                 </form>
             </div>
-            <div className='fixed z-[500] top-0 left-0 w-full h-[100dvh] backdrop-blur-sm bg-transparent' style={uploading ? {display: "block"} : {display: "none"}}>
+            <div className='fixed z-[500] top-0 left-0 w-full h-[100dvh] backdrop-blur-sm bg-transparent' style={uploading ? { display: "block" } : { display: "none" }}>
                 <p className='absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] font-inter-medium text-[20px] leading-[26px]'>Uploading...</p>
+            </div>
+            <div className='fixed z-[500] top-0 left-0 w-full h-[100dvh] backdrop-blur-sm bg-transparent' style={loading ? { display: "block" } : { display: "none" }}>
+                <p className='absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] font-inter-medium text-[20px] leading-[26px]'>Loading...</p>
             </div>
         </>
     )
