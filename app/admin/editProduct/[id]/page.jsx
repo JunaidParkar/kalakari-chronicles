@@ -6,38 +6,26 @@ import axios from "axios";
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 const Page = ({ params }) => {
-    const {id} = use(params);
-    const [loading, setLoading] = useState(false)
+    const { id } = use(params);
+    const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
-    const dummyResonse = {
-        "product": {
-          "name": "hjbk",
-          "price": "05",
-          "description": "<p>efefefefefe</p>",
-          "madeBy": "kku",
-          "category": "iuhui",
-          "images": [
-            "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/f1fjdtqv8vgx54umbpog.jpg",
-            "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/wl4iyna0d631ugwhvbgp.png",
-            "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/bcqymmti7jefpz7mjdcf.jpg",
-            "https://res.cloudinary.com/dom9c4d5q/image/upload/v1743017307/products/k1hqfnvdmeef4420bmwf.jpg"
-          ],
-          "image_public_ids": [
-            "products/f1fjdtqv8vgx54umbpog",
-            "products/wl4iyna0d631ugwhvbgp",
-            "products/bcqymmti7jefpz7mjdcf",
-            "products/k1hqfnvdmeef4420bmwf"
-          ],
-          "createdAt": "2025-03-26T19:28:27.444Z"
-        }
-      }
 
     const [realProductData, setRealProductData] = useState({
         name: "",
         price: 0,
         madeBy: "",
         category: "",
-        description: ""
+        description: "",
+        images: [null, null, null, null]
+    })
+
+    const [newProductData, setNewProductData] = useState({
+        name: "",
+        price: 0,
+        madeBy: "",
+        category: "",
+        description: "",
+        images: [null, null, null, null]
     })
 
     const editor = useRef(null);
@@ -63,11 +51,8 @@ const Page = ({ params }) => {
             } catch (error) {
                 console.error("Error fetching categories:", error);
             }
-            if (id) {
-                let data = dummyResonse
-                setRealProductData({name: data.product.name, category: data.product.category, description: data.product.description, price: data.product.price, madeBy: data.product.madeBy})
-            }
-            setLoading(false)
+            id ? setLoading(false) : setLoading(true)
+            // console.log(newProductData.images)
         };
         getCategories();
     }, []);
@@ -81,20 +66,31 @@ const Page = ({ params }) => {
     );
 
     useEffect(() => {
-        if (id) {
-            setLoading(true)
-            
-            setLoading(false)
-            // axios.post()
+        let getProduct = async () => {
+            if (id) {
+                setLoading(true)
+                if (id) {
+                    let product = await axios.post("http://localhost:5000/admin/getProduct", { id })
+                    let data = product.data
+                    console.log(data)
+                    if (data) {
+                        setRealProductData({ ...realProductData, name: data.product.name, category: data.product.category, description: data.product.description, price: data.product.price, madeBy: data.product.madeBy, images: [...data.product.images] })
+                        setNewProductData({ ...newProductData, name: data.product.name, category: data.product.category, description: data.product.description, price: data.product.price, madeBy: data.product.madeBy })
+                    } else {console.error("No product")}
+                }
+                setLoading(false)
+                // axios.post()
+            }
         }
+        getProduct()
     }, [id]);
 
     const handleImageChange = (event, index) => {
         const file = event.target.files[0];
         if (file) {
-            const updatedImages = [...images];
+            const updatedImages = [...newProductData.images];
             updatedImages[index] = file;
-            setImages(updatedImages);
+            setNewProductData({ ...newProductData, images: updatedImages });
         }
     };
 
@@ -109,14 +105,13 @@ const Page = ({ params }) => {
             description.trim() === ""
         ) {
             alert(
-                `Please Enter the ${
-                    productData.name.trim() === ""
-                        ? "product name"
-                        : productData.price <= 0
+                `Please Enter the ${productData.name.trim() === ""
+                    ? "product name"
+                    : productData.price <= 0
                         ? "Price of the product"
                         : productData.madeBy.trim() === ""
-                        ? "name of the creator"
-                        : "description of product"
+                            ? "name of the creator"
+                            : "description of product"
                 }`
             );
             setUploading(false);
@@ -171,10 +166,10 @@ const Page = ({ params }) => {
                 <h3 className='font-inter-bold text-[24px] leading-[30px] text-text-normal-black'>Add a new product</h3>
                 <form className='w-full mt-[30px]' onSubmit={submitData}>
                     <div className='w-full flex gap-[20px] flex-wrap'>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={productData.name} onChange={val => setProductData({ ...productData, name: val.target.value })} /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={productData.category} onChange={val => setProductData({ ...productData, category: val.target.value })} list='categoryList' /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="number" name="" id="" placeholder='Enter the price of the product' value={productData.price} onChange={val => setProductData({ ...productData, price: val.target.value })} /></div>
-                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Product Made By' value={productData.madeBy} onChange={val => setProductData({ ...productData, madeBy: val.target.value })} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the name of the poduct' value={newProductData.name} onChange={val => setNewProductData({ ...newProductData, name: val.target.value })} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Enter the category of the product' value={newProductData.category} onChange={val => setNewProductData({ ...newProductData, category: val.target.value })} list='categoryList' /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="number" name="" id="" placeholder='Enter the price of the product' value={newProductData.price} onChange={val => setNewProductData({ ...newProductData, price: val.target.value })} /></div>
+                        <div className='border-[1px] border-white-border px-[15px] py-[10px] rounded-[8px] w-[calc(50%-10px)]'><input className='w-full h-full outline-0 font-inter-regular text-[16px] leading-[24px]' type="text" name="" id="" placeholder='Product Made By' value={newProductData.madeBy} onChange={val => setNewProductData({ ...newProductData, madeBy: val.target.value })} /></div>
                         <datalist id='categoryList'>
                             {categories.map((cat, index) => (
                                 <option key={index} value={cat}></option>
@@ -184,18 +179,18 @@ const Page = ({ params }) => {
                     <div className='w-full mt-[20px]'>
                         <JoditEditor
                             ref={editor}
-                            value={description}
+                            value={newProductData.description}
                             config={config}
                             tabIndex={1} // tabIndex of textarea
                             onBlur={newContent => setDescription(newContent)} // preferred to use only this option to update the content for performance reasons
-                            onChange={newContent => setDescription(newContent)}
+                            onChange={newContent => setNewProductData({ ...newProductData, description: newContent })}
                         />
                     </div>
                     <div className='w-full mt-[20px] flex gap-[20px]'>
-                        <label htmlFor="image1" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[0] != null ? { display: "none" } : { display: "block" }}>Select Image 1</p><img src={images[0] ? URL.createObjectURL(images[0]) : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[0] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
-                        <label htmlFor="image2" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[1] != null ? { display: "none" } : { display: "block" }}>Select Image 2</p><img src={images[1] ? URL.createObjectURL(images[1]) : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[1] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
-                        <label htmlFor="image3" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[2] != null ? { display: "none" } : { display: "block" }}>Select Image 3</p><img src={images[2] ? URL.createObjectURL(images[2]) : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[2] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
-                        <label htmlFor="image4" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={images[3] != null ? { display: "none" } : { display: "block" }}>Select Image 4</p><img src={images[3] ? URL.createObjectURL(images[3]) : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={images[3] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
+                        <label htmlFor="image1" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={realProductData.images[0] != null ? { display: "none" } : { display: "block" }}>Select Image 1</p><img src={newProductData.images[0] ? URL.createObjectURL(newProductData.images[0]) : realProductData.images[0] ? realProductData.images[0] : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={realProductData.images[0] == null && newProductData.images[0] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
+                        <label htmlFor="image2" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={realProductData.images[1] != null ? { display: "none" } : { display: "block" }}>Select Image 2</p><img src={newProductData.images[1] ? URL.createObjectURL(newProductData.images[1]) : realProductData.images[1] ? realProductData.images[1] : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={realProductData.images[1] == null && newProductData.images[1] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
+                        <label htmlFor="image3" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={realProductData.images[2] != null ? { display: "none" } : { display: "block" }}>Select Image 3</p><img src={newProductData.images[2] ? URL.createObjectURL(newProductData.images[2]) : realProductData.images[2] ? realProductData.images[2] : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={realProductData.images[2] == null && newProductData.images[2] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
+                        <label htmlFor="image4" className='w-[calc(25%-15px)] aspect-square border border-white-border flex justify-center items-center cursor-pointer rounded-[8px]'><p className='text-[16px] font-inter-regular leading-[24px] text-center' style={realProductData.images[3] != null ? { display: "none" } : { display: "block" }}>Select Image 4</p><img src={newProductData.images[3] ? URL.createObjectURL(newProductData.images[3]) : realProductData.images[3] ? realProductData.images[3] : "/assets/images/handcrafted.jpg"} className='w-full h-full aspect-square object-cover rounded-[8px]' style={realProductData.images[3] == null && newProductData.images[3] == null ? { display: "none" } : { display: "block" }} alt="" /></label>
                         <input type="file" id='image1' accept="image/*" className='hidden' onChange={(e) => handleImageChange(e, 0)} />
                         <input type="file" id='image2' accept="image/*" className='hidden' onChange={(e) => handleImageChange(e, 1)} />
                         <input type="file" id='image3' accept="image/*" className='hidden' onChange={(e) => handleImageChange(e, 2)} />
