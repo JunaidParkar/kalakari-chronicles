@@ -16,7 +16,8 @@ const Page = ({ params }) => {
         madeBy: "",
         category: "",
         description: "",
-        images: [null, null, null, null]
+        images: [null, null, null, null],
+        image_public_ids: [null, null, null, null]
     })
 
     const [newProductData, setNewProductData] = useState({
@@ -25,7 +26,8 @@ const Page = ({ params }) => {
         madeBy: "",
         category: "",
         description: "",
-        images: [null, null, null, null]
+        images: [null, null, null, null],
+        id_to_replace: [null, null, null, null]
     })
 
     const editor = useRef(null);
@@ -74,7 +76,7 @@ const Page = ({ params }) => {
                     let data = product.data
                     console.log(data)
                     if (data) {
-                        setRealProductData({ ...realProductData, name: data.product.name, category: data.product.category, description: data.product.description, price: data.product.price, madeBy: data.product.madeBy, images: [...data.product.images] })
+                        setRealProductData({ ...realProductData, name: data.product.name, category: data.product.category, description: data.product.description, price: data.product.price, madeBy: data.product.madeBy, image_public_ids: data.product.image_public_ids, images: [...data.product.images] })
                         setNewProductData({ ...newProductData, name: data.product.name, category: data.product.category, description: data.product.description, price: data.product.price, madeBy: data.product.madeBy })
                     } else {console.error("No product")}
                 }
@@ -88,9 +90,12 @@ const Page = ({ params }) => {
     const handleImageChange = (event, index) => {
         const file = event.target.files[0];
         if (file) {
-            const updatedImages = [...newProductData.images];
+            newProductData
+            let updatedImages = [...newProductData.images];
             updatedImages[index] = file;
-            setNewProductData({ ...newProductData, images: updatedImages });
+            let updatedId = [...newProductData.id_to_replace]
+            updatedId[index] = realProductData.image_public_ids[index]
+            setNewProductData({ ...newProductData, images: updatedImages, id_to_replace: updatedId });
         }
     };
 
@@ -99,17 +104,17 @@ const Page = ({ params }) => {
         setUploading(true);
 
         if (
-            productData.name.trim() === "" ||
-            productData.price <= 0 ||
-            productData.madeBy.trim() === "" ||
-            description.trim() === ""
+            newProductData.name.trim() === "" ||
+            newProductData.price <= 0 ||
+            newProductData.madeBy.trim() === "" ||
+            newProductData.description.trim() === ""
         ) {
             alert(
-                `Please Enter the ${productData.name.trim() === ""
+                `Please Enter the ${newProductData.name.trim() === ""
                     ? "product name"
-                    : productData.price <= 0
+                    : newProductData.price <= 0
                         ? "Price of the product"
-                        : productData.madeBy.trim() === ""
+                        : newProductData.madeBy.trim() === ""
                             ? "name of the creator"
                             : "description of product"
                 }`
@@ -118,40 +123,58 @@ const Page = ({ params }) => {
             return;
         }
 
-        if (images.some((img) => img === null)) {
-            alert("Please select all 4 images");
-            setUploading(false);
-            return;
-        }
-
         const formData = new FormData();
-        formData.append("name", productData.name);
-        formData.append("price", productData.price);
-        formData.append("madeBy", productData.madeBy);
-        formData.append("category", productData.category);
-        formData.append("description", description);
-
-        images.forEach((image, index) => {
-            if (image) {
-                formData.append(`image${index + 1}`, image);
-            }
-        });
-
-        try {
-            const { data } = await axios.post(
-                "http://localhost:5000/admin/addProduct",
-                formData,
-                {
-                    headers: { "Content-Type": "multipart/form-data" },
-                }
-            );
-
-            console.log("Upload Success:", data);
-            alert("Product uploaded successfully!");
-        } catch (error) {
-            console.error("Upload Error:", error.response?.data || error.message);
-            alert("Upload failed!");
+        if (newProductData.name != realProductData.name) {
+            formData.append("name", newProductData.name)
         }
+        if (newProductData.category != realProductData.category) {
+            formData.append("category", newProductData.category)
+        }
+        if (newProductData.description != realProductData.description) {
+            formData.append("description", newProductData.description)
+        }
+        if (newProductData.madeBy != realProductData.madeBy) {
+            formData.append("madeBy", newProductData.madeBy)
+        }
+        if (!newProductData.images.every(arr => arr === null)) {
+            formData.append("images", newProductData.images)
+            formData.append("id_to_replace", newProductData.id_to_replace)
+        }
+
+        // if (images.some((img) => img === null)) {
+        //     alert("Please select all 4 images");
+        //     setUploading(false);
+        //     return;
+        // }
+
+        // const formData = new FormData();
+        // formData.append("name", productData.name);
+        // formData.append("price", productData.price);
+        // formData.append("madeBy", productData.madeBy);
+        // formData.append("category", productData.category);
+        // formData.append("description", description);
+
+        // images.forEach((image, index) => {
+        //     if (image) {
+        //         formData.append(`image${index + 1}`, image);
+        //     }
+        // });
+
+        // try {
+        //     const { data } = await axios.post(
+        //         "http://localhost:5000/admin/addProduct",
+        //         formData,
+        //         {
+        //             headers: { "Content-Type": "multipart/form-data" },
+        //         }
+        //     );
+
+        //     console.log("Upload Success:", data);
+        //     alert("Product uploaded successfully!");
+        // } catch (error) {
+        //     console.error("Upload Error:", error.response?.data || error.message);
+        //     alert("Upload failed!");
+        // }
         setUploading(false);
     };
 
