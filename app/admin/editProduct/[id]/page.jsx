@@ -123,9 +123,18 @@ const Page = ({ params }) => {
             return;
         }
 
+        if (newProductData.name == realProductData.name && newProductData.category == realProductData.category && newProductData.description == realProductData.description && newProductData.madeBy == realProductData.madeBy && newProductData.images.every(arr => arr === null)) {
+            setUploading(false);
+            alert("No changes detected")
+            return
+        }
+
         const formData = new FormData();
         if (newProductData.name != realProductData.name) {
             formData.append("name", newProductData.name)
+        }
+        if (newProductData.price != realProductData.price) {
+            formData.append("price", newProductData.price)
         }
         if (newProductData.category != realProductData.category) {
             formData.append("category", newProductData.category)
@@ -136,45 +145,19 @@ const Page = ({ params }) => {
         if (newProductData.madeBy != realProductData.madeBy) {
             formData.append("madeBy", newProductData.madeBy)
         }
-        if (!newProductData.images.every(arr => arr === null)) {
-            formData.append("images", newProductData.images)
-            formData.append("id_to_replace", newProductData.id_to_replace)
-        }
+        newProductData.images.forEach((image, index) => {
+            if (image) {
+                formData.append(`images`, image); // Append only non-null images
+                formData.append(`id_to_replace`, newProductData.id_to_replace[index]); // Append corresponding public_id
+            }
+        });
 
-        // if (images.some((img) => img === null)) {
-        //     alert("Please select all 4 images");
-        //     setUploading(false);
-        //     return;
-        // }
-
-        // const formData = new FormData();
-        // formData.append("name", productData.name);
-        // formData.append("price", productData.price);
-        // formData.append("madeBy", productData.madeBy);
-        // formData.append("category", productData.category);
-        // formData.append("description", description);
-
-        // images.forEach((image, index) => {
-        //     if (image) {
-        //         formData.append(`image${index + 1}`, image);
-        //     }
-        // });
-
-        // try {
-        //     const { data } = await axios.post(
-        //         "http://localhost:5000/admin/addProduct",
-        //         formData,
-        //         {
-        //             headers: { "Content-Type": "multipart/form-data" },
-        //         }
-        //     );
-
-        //     console.log("Upload Success:", data);
-        //     alert("Product uploaded successfully!");
-        // } catch (error) {
-        //     console.error("Upload Error:", error.response?.data || error.message);
-        //     alert("Upload failed!");
-        // }
+        axios.post("http://localhost:5000/admin/editProduct", formData, {headers: { "Content-Type": "multipart/form-data" }}).then(response => {
+            console.log("Product edited successfully", response.status)
+            console.log(response.data)
+        }).catch(error => {
+            console.log(error)
+        })
         setUploading(false);
     };
 
@@ -182,7 +165,7 @@ const Page = ({ params }) => {
         <>
             <div className='w-full h-[75px] px-[25px] flex justify-between items-center bg-white border-0 border-b border-white-border'>
                 <h3 className='font-inter-bold text-[24px] leading-[32px] text-pink-accent'>Admin Panel</h3>
-                <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Sharvari Uttam Palande</p>
+                <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Junaid Parkar</p>
             </div>
 
             <div className='w-full h-[calc(100dvh-75px)] overflow-x-hidden overflow-y-auto px-[25px] pt-[30px]'>

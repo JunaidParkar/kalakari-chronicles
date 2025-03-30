@@ -99,7 +99,7 @@ const Page = () => {
         <>
             <div className='w-full h-[75px] px-[25px] flex justify-between items-center bg-white border-0 border-b border-white-border'>
                 <h3 className='font-inter-bold text-[24px] leading-[32px] text-pink-accent'>Admin Panel</h3>
-                <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Sharvari Uttam Palande</p>
+                <p className='font-inter-regular text-[16px] leading-[24px] text-text-secondary-black'>Junaid Parkar</p>
             </div>
 
             <div className='w-full h-[calc(100dvh-75px)] overflow-x-hidden overflow-y-auto px-[25px] pt-[30px]'>
