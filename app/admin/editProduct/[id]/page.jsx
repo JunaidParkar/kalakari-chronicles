@@ -130,6 +130,7 @@ const Page = ({ params }) => {
         }
 
         const formData = new FormData();
+        formData.append("id", id)
         if (newProductData.name != realProductData.name) {
             formData.append("name", newProductData.name)
         }
