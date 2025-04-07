@@ -1,10 +1,23 @@
 "use client"
+import axios from 'axios'
 import { ArrowLeft, ArrowRight, Pencil, Plus, Trash } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 const Page = () => {
   const router = useRouter()
+
+  const [postData, setPostData] = useState([])
+
+  useEffect(() => {
+    let getPosts = async () => {
+      await axios.post("http://localhost:5000/admin/allProducts").then(resp => {
+        setPostData(resp.data.data)
+      })
+    }
+    getPosts()
+  }, [])
+
   return (
     <>
       <div className='w-full h-[75px] px-[25px] flex justify-between items-center bg-white border-0 border-b border-white-border'>
@@ -49,13 +62,13 @@ const Page = () => {
 
           {/* Table Body with Scroll */}
           <div className="h-[calc(100%-55px)] overflow-y-auto scrollbar-hidden pb-[5px]">
-            {[...Array(12)].map((_, index) => (
+            {postData ? postData.map((p, index) => (
               <div key={index} className="flex w-full items-center h-[55px] hover:bg-pink-shade border-t-[2px] border-white-border px-[20px]">
                 <div className="w-[35%]">
                   <div className="flex gap-[15px] items-center">
-                    <img src="/assets/images/handcrafted.jpg" alt="" className="w-[40px] object-cover aspect-square rounded-[8px]" />
+                    <img src={p.images[0]} alt="" className="w-[40px] object-cover aspect-square rounded-[8px]" />
                     <p className="w-[calc(100%-55px)] font-inter-regular text-[16px] leading-[24px] overflow-hidden overflow-ellipsis whitespace-nowrap">
-                      All Lorem ipsum dolor sit, amet consectetur adipisicing elit. lorem100
+                      {p.name}
                     </p>
                   </div>
                 </div>
@@ -66,11 +79,11 @@ const Page = () => {
                 <div className="w-[15%] text-center">12:00</div>
                 <div className="w-[15%] text-center">21/12/2000</div>
                 <div className="w-[5%] flex justify-end gap-4">
-                  <Pencil size={18} className="text-text-normal-black cursor-pointer" />
+                  <Pencil size={18} className="text-text-normal-black cursor-pointer" onClick={() => router.push(`/admin/editProduct/${p.id}`)} />
                   <Trash size={18} className="text-text-normal-black cursor-pointer" />
                 </div>
               </div>
-            ))}
+            )): ""}
           </div>
         </div>
       </div>
