@@ -1,5 +1,6 @@
 "use client"
 
+import axios from 'axios';
 import { ChevronsLeft, ChevronsRight, Instagram, MessageCircle, Search, ShoppingCart, UserPen } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
@@ -8,6 +9,7 @@ const Page = () => {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true); // Assume it can scroll right initially
+  const [categories, setCategories] = useState([])
 
   // Function to check scroll position
   const checkScrollPosition = () => {
@@ -40,6 +42,15 @@ const Page = () => {
     if (scrollElement) {
       scrollElement.addEventListener("scroll", handleScroll);
     }
+
+    const fetchProducts = async() => {
+        await axios.post("http://localhost:5000/local/getHomePage").then(data => {
+          let resp = data.data()
+          setCategories(resp.categories)
+        })
+    }
+
+    fetchProducts()
     return () => {
       if (scrollElement) {
         scrollElement.removeEventListener("scroll", handleScroll);

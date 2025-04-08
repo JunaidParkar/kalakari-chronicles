@@ -76,6 +76,8 @@ const Page = () => {
             }
         });
 
+        console.log(formData.getAll("image2"))
+
         try {
             const { data } = await axios.post(
                 "http://localhost:5000/admin/addProduct",
