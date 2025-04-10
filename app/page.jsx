@@ -2,14 +2,18 @@
 
 import axios from 'axios';
 import { ChevronsLeft, ChevronsRight, Instagram, MessageCircle, Search, ShoppingCart, UserPen } from 'lucide-react'
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react'
 
 const Page = () => {
+
+  const router = useRouter()
 
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true); // Assume it can scroll right initially
   const [categories, setCategories] = useState([])
+  const [products, setProducts] = useState([])
 
   // Function to check scroll position
   const checkScrollPosition = () => {
@@ -43,11 +47,12 @@ const Page = () => {
       scrollElement.addEventListener("scroll", handleScroll);
     }
 
-    const fetchProducts = async() => {
-        await axios.post("http://localhost:5000/local/getHomePage").then(data => {
-          let resp = data.data()
-          setCategories(resp.categories)
-        })
+    const fetchProducts = async () => {
+      await axios.post("http://localhost:5000/local/getHomePage").then(data => {
+        let resp = data.data
+        setCategories(resp.categories)
+        setProducts(resp.newArrivals)
+      })
     }
 
     fetchProducts()
@@ -103,30 +108,14 @@ const Page = () => {
           ref={scrollRef}
           className='w-full overflow-x-auto flex gap-[20px] snap-x snap-mandatory scroll-smooth scrollbar-hidden'
         >
-          <div className='w-[calc(25%-15px)] shrink-0 aspect-[9/10] snap-start flex flex-col justify-between'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-[8px]' />
-            <p className='font-inter-regular text-[20px] leading-[28px] text-text-normal-black w-full overflow-hidden overflow-ellipsis whitespace-nowrap'>Jewellery</p>
-          </div>
-          <div className='w-[calc(25%-15px)] shrink-0 aspect-[9/10] snap-start flex flex-col justify-between'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-[8px]' />
-            <p className='font-inter-regular text-[20px] leading-[28px] text-text-normal-black w-full overflow-hidden overflow-ellipsis whitespace-nowrap'>Jewellery</p>
-          </div>
-          <div className='w-[calc(25%-15px)] shrink-0 aspect-[9/10] snap-start flex flex-col justify-between'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-[8px]' />
-            <p className='font-inter-regular text-[20px] leading-[28px] text-text-normal-black w-full overflow-hidden overflow-ellipsis whitespace-nowrap'>Jewellery</p>
-          </div>
-          <div className='w-[calc(25%-15px)] shrink-0 aspect-[9/10] snap-start flex flex-col justify-between'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-[8px]' />
-            <p className='font-inter-regular text-[20px] leading-[28px] text-text-normal-black w-full overflow-hidden overflow-ellipsis whitespace-nowrap'>Jewellery</p>
-          </div>
-          <div className='w-[calc(25%-15px)] shrink-0 aspect-[9/10] snap-start flex flex-col justify-between'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-[8px]' />
-            <p className='font-inter-regular text-[20px] leading-[28px] text-text-normal-black w-full overflow-hidden overflow-ellipsis whitespace-nowrap'>Jewellery</p>
-          </div>
-          <div className='w-[calc(25%-15px)] shrink-0 aspect-[9/10] snap-start flex flex-col justify-between'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-[8px]' />
-            <p className='font-inter-regular text-[20px] leading-[28px] text-text-normal-black w-full overflow-hidden overflow-ellipsis whitespace-nowrap'>Jewellery</p>
-          </div>
+          {
+            categories && categories.length > 0 ? categories.map((cat, index) => (
+              <div key={index} className='w-[calc(25%-15px)] shrink-0 aspect-[9/10] snap-start flex flex-col justify-between'>
+                <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-[8px]' />
+                <p className='font-inter-regular text-[20px] leading-[28px] text-text-normal-black w-full overflow-hidden overflow-ellipsis whitespace-nowrap mt-[15px]'>{cat}</p>
+              </div>
+            )) : ""
+          }
         </div>
 
         {/* Right Arrow (Outside the scroll div) */}
@@ -144,50 +133,21 @@ const Page = () => {
       <div className='w-full px-[125px] mt-[50px] flex flex-col gap-[20px]'>
         <h3 className='font-inter-bold text-[30px] leading-[36px] text-text-normal-black'>New arrivals</h3>
         <div className='w-full flex gap-[20px]'>
-          <div className='w-[calc(25%-15px)] flex flex-col gap-[7px] drop-shadow-md bg-white pb-[20px] rounded-[8px]'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-t-[8px]' />
-            <div className='w-full flex flex-col gap-[7px] px-[20px]'>
-              <h5 className='w-full font-inter-medium text-[18px] leading-[28px] text-text-normal-black overflow-hidden overflow-ellipsis whitespace-nowrap'>Ceramic vase</h5>
-              <p className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Rs. <span>89.99</span></p>
-              <p className='font-inter-regular text-[14px] leading-[20px] text-text-secondary-black'>By Sharvari Palande</p>
-              <div className='w-full border-[2px] border-pink-accent py-[5px] flex justify-center items-center rounded-[8px]'>
-                <p className='font-inter-medium text-[16px] leading-[24px] text-pink-accent'>Add to cart</p>
+          {
+            products && products.length > 0 ? products.map((prod, index) => (
+              <div key={index} className='w-[calc(25%-15px)] flex flex-col gap-[7px] drop-shadow-md bg-white pb-[20px] rounded-[8px]'>
+                <img src={prod.images[0]} alt="category" className='w-full aspect-square object-cover rounded-t-[8px]' />
+                <div className='w-full flex flex-col gap-[7px] px-[20px]'>
+                  <h5 className='w-full font-inter-medium text-[18px] leading-[28px] text-text-normal-black overflow-hidden overflow-ellipsis whitespace-nowrap'>{prod.name}</h5>
+                  <p className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Rs. <span>{prod.price}</span></p>
+                  <p className='font-inter-regular text-[14px] leading-[20px] text-text-secondary-black'>By {prod.madeBy}</p>
+                  <div className='w-full border-[2px] border-pink-accent py-[5px] flex justify-center items-center rounded-[8px]' onClick={() => router.push(`/product/${prod.id}`)}>
+                    <p className='font-inter-medium text-[16px] leading-[24px] text-pink-accent'>View product</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className='w-[calc(25%-15px)] flex flex-col gap-[7px] drop-shadow-md bg-white pb-[20px] rounded-[8px]'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-t-[8px]' />
-            <div className='w-full flex flex-col gap-[7px] px-[20px]'>
-              <h5 className='w-full font-inter-medium text-[18px] leading-[28px] text-text-normal-black overflow-hidden overflow-ellipsis whitespace-nowrap'>Ceramic vase</h5>
-              <p className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Rs. <span>89.99</span></p>
-              <p className='font-inter-regular text-[14px] leading-[20px] text-text-secondary-black'>By Sharvari Palande</p>
-              <div className='w-full border-[2px] border-pink-accent py-[5px] flex justify-center items-center rounded-[8px]'>
-                <p className='font-inter-medium text-[16px] leading-[24px] text-pink-accent'>Add to cart</p>
-              </div>
-            </div>
-          </div>
-          <div className='w-[calc(25%-15px)] flex flex-col gap-[7px] drop-shadow-md bg-white pb-[20px] rounded-[8px]'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-t-[8px]' />
-            <div className='w-full flex flex-col gap-[7px] px-[20px]'>
-              <h5 className='w-full font-inter-medium text-[18px] leading-[28px] text-text-normal-black overflow-hidden overflow-ellipsis whitespace-nowrap'>Ceramic vase</h5>
-              <p className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Rs. <span>89.99</span></p>
-              <p className='font-inter-regular text-[14px] leading-[20px] text-text-secondary-black'>By Sharvari Palande</p>
-              <div className='w-full border-[2px] border-pink-accent py-[5px] flex justify-center items-center rounded-[8px]'>
-                <p className='font-inter-medium text-[16px] leading-[24px] text-pink-accent'>Add to cart</p>
-              </div>
-            </div>
-          </div>
-          <div className='w-[calc(25%-15px)] flex flex-col gap-[7px] drop-shadow-md bg-white pb-[20px] rounded-[8px]'>
-            <img src="/assets/images/handcrafted.jpg" alt="category" className='w-full aspect-square object-cover rounded-t-[8px]' />
-            <div className='w-full flex flex-col gap-[7px] px-[20px]'>
-              <h5 className='w-full font-inter-medium text-[18px] leading-[28px] text-text-normal-black overflow-hidden overflow-ellipsis whitespace-nowrap'>Ceramic vase</h5>
-              <p className='font-inter-bold text-[16px] leading-[24px] text-pink-accent'>Rs. <span>89.99</span></p>
-              <p className='font-inter-regular text-[14px] leading-[20px] text-text-secondary-black'>By Sharvari Palande</p>
-              <div className='w-full border-[2px] border-pink-accent py-[5px] flex justify-center items-center rounded-[8px]'>
-                <p className='font-inter-medium text-[16px] leading-[24px] text-pink-accent'>Add to cart</p>
-              </div>
-            </div>
-          </div>
+            )) : ""
+          }
         </div>
       </div>
 
